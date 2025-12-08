@@ -11,7 +11,7 @@ if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
     .start();
 }
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 // Serveur HTTP
 const server = http.createServer((req, res) => {
