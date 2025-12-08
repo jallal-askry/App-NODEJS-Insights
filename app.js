@@ -3,9 +3,10 @@ import http from 'http';
 import appInsights from 'applicationinsights';
 
 // Configuration Application Insights
-if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
+const connectionString = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING || process.env.APPINSIGHTS_CONNECTIONSTRING;
+if (connectionString) {
   appInsights
-    .setup(process.env.APPINSIGHTS_CONNECTIONSTRING)
+    .setup(connectionString)
     .setAutoCollectRequests(true)
     .setAutoCollectDependencies(true)
     .start();
@@ -300,7 +301,8 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Serveur démarré sur le port ${PORT}`);
   console.log(`🌐 http://localhost:${PORT}`);
-  console.log(`📊 Application Insights: ${process.env.APPINSIGHTS_CONNECTIONSTRING ? '✅ Configuré' : '⚠️ Non configuré'}`);
+  const connStr = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING || process.env.APPINSIGHTS_CONNECTIONSTRING;
+  console.log(`📊 Application Insights: ${connStr ? '✅ Configuré' : '⚠️ Non configuré'}`);
 });
 
 process.on('SIGTERM', () => {
