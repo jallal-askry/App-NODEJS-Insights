@@ -26,15 +26,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create deployment package
-        run: zip -r release.zip . -x "node_modules/*" ".git/*" ".gitignore" "*.yml"
-
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: release.zip
+          package: .
 
-      - name: Success message
-        run: echo "✅ Deployment successful to https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+      - name: Deployment successful
+        run: echo "✅ Successfully deployed to Azure Web App"
