@@ -2,14 +2,26 @@
 import http from 'http';
 import appInsights from 'applicationinsights';
 
-// Configuration Application Insights
+// Configuration Application Insights AVANT tout
 const connectionString = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING || process.env.APPINSIGHTS_CONNECTIONSTRING;
+console.log('🔍 Connection String présente:', !!connectionString);
+
 if (connectionString) {
-  appInsights
-    .setup(connectionString)
-    .setAutoCollectRequests(true)
-    .setAutoCollectDependencies(true)
-    .start();
+  try {
+    appInsights
+      .setup(connectionString)
+      .setAutoCollectConsole(true, true)
+      .setAutoCollectExceptions(true)
+      .setAutoCollectRequests(true)
+      .setAutoCollectPerformance(true, true)
+      .setAutoCollectDependencies(true)
+      .start();
+    console.log('✅ Application Insights initialisé avec succès');
+  } catch (err) {
+    console.error('❌ Erreur lors de l\'initialisation d\'Application Insights:', err.message);
+  }
+} else {
+  console.log('⚠️ Application Insights: Non configuré (aucune connection string trouvée)');
 }
 
 const PORT = process.env.PORT || 8080;
