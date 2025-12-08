@@ -1,13 +1,18 @@
 import readline from 'readline';
 import { stdin as input, stdout as output } from 'process';
+import http from 'http';
 import appInsights from 'applicationinsights';
 
 // Configuration Application Insights
-appInsights
-  .setup(process.env.APPINSIGHTS_CONNECTIONSTRING)
-  .setAutoCollectRequests(true)
-  .setAutoCollectDependencies(true)
-  .start();
+if (process.env.APPINSIGHTS_CONNECTIONSTRING) {
+  appInsights
+    .setup(process.env.APPINSIGHTS_CONNECTIONSTRING)
+    .setAutoCollectRequests(true)
+    .setAutoCollectDependencies(true)
+    .start();
+}
+
+const PORT = process.env.PORT || 8080;
 
 class JeuDevinette {
   constructor() {
@@ -149,6 +154,54 @@ class JeuDevinette {
   }
 }
 
-// Lancer le jeu
-const jeu = new JeuDevinette();
-jeu.demarrer();
+// Serveur HTTP pour Azure Web App
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+  res.end(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>🎮 Jeu de Devinette Node.js</title>
+      <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background: #f0f0f0; }
+        h1 { color: #333; }
+        .container { background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        p { color: #666; line-height: 1.6; }
+        .status { padding: 10px; background: #e8f5e9; border-left: 4px solid #4caf50; margin: 20px 0; }
+        code { background: #f5f5f5; padding: 2px 5px; border-radius: 3px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>🎮 Jeu de Devinette</h1>
+        <p>Application Node.js 24 LTS déployée sur Azure Web App</p>
+        <div class="status">
+          <strong>✅ Serveur en ligne</strong><br>
+          Pour jouer en mode interactif: <code>npm start -- --game</code>
+        </div>
+        <h3>Fonctionnalités</h3>
+        <ul style="text-align: left; display: inline-block;">
+          <li>🎯 Devinez un nombre entre 1 et 100</li>
+          <li>🏆 Système de score</li>
+          <li>📊 Statistiques en temps réel</li>
+          <li>📡 Intégration Application Insights</li>
+        </ul>
+        <hr>
+        <p><small>Powered by Node.js 24 LTS | Azure Web App | Application Insights</small></p>
+      </div>
+    </body>
+    </html>
+  `);
+});
+
+server.listen(PORT, () => {
+  console.log(`🚀 Serveur Web lancé sur http://localhost:${PORT}`);
+  console.log(`📊 Application Insights: ${process.env.APPINSIGHTS_CONNECTIONSTRING ? '✅ Configuré' : '⚠️ Non configuré'}`);
+});
+
+// Lancer le jeu en mode interactif si demandé
+if (process.argv[2] === '--game') {
+  const jeu = new JeuDevinette();
+  jeu.demarrer();
+}
+
