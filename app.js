@@ -3,19 +3,26 @@ import http from 'http';
 import appInsights from 'applicationinsights';
 
 // Configuration Application Insights AVANT tout
-const connectionString = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING || process.env.APPINSIGHTS_CONNECTIONSTRING;
-console.log('🔍 Connection String présente:', !!connectionString);
+const connectionString = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING;
+console.log('🔍 Connection String présente (APPLICATIONINSIGHTS_CONNECTION_STRING):', !!connectionString);
 
 if (connectionString) {
   try {
-    appInsights
+    const aiConfig = appInsights
       .setup(connectionString)
       .setAutoCollectConsole(true, true)
       .setAutoCollectExceptions(true)
       .setAutoCollectRequests(true)
       .setAutoCollectPerformance(true, true)
-      .setAutoCollectDependencies(true)
-      .start();
+      .setAutoCollectDependencies(true);
+
+    const samplingPct = Number(process.env.APPINSIGHTS_SAMPLING_PERCENTAGE ?? 100);
+    if (!Number.isNaN(samplingPct)) {
+      appInsights.defaultClient.config.samplingPercentage = samplingPct;
+      console.log(`📉 Sampling Application Insights à ${samplingPct}%`);
+    }
+
+    aiConfig.start();
     console.log('✅ Application Insights initialisé avec succès');
   } catch (err) {
     console.error('❌ Erreur lors de l\'initialisation d\'Application Insights:', err.message);
@@ -313,7 +320,7 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Serveur démarré sur le port ${PORT}`);
   console.log(`🌐 http://localhost:${PORT}`);
-  const connStr = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING || process.env.APPINSIGHTS_CONNECTIONSTRING;
+  const connStr = process.env.APPLICATIONINSIGHTS_CONNECTION_STRING;
   console.log(`📊 Application Insights: ${connStr ? '✅ Configuré' : '⚠️ Non configuré'}`);
 });
 
