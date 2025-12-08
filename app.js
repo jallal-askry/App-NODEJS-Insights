@@ -24,6 +24,10 @@ if (connectionString) {
 
     aiConfig.start();
     console.log('✅ Application Insights initialisé avec succès');
+    
+    // Envoyer un événement de test au démarrage pour confirmer la connexion
+    appInsights.defaultClient.trackEvent({ name: 'AppStarted' });
+    appInsights.defaultClient.flush();
   } catch (err) {
     console.error('❌ Erreur lors de l\'initialisation d\'Application Insights:', err.message);
   }
