@@ -315,6 +315,41 @@ const server = http.createServer((req, res) => {
       timestamp: new Date().toISOString(),
       uptime: process.uptime()
     }));
+  } else if (req.url === '/ai-test') {
+    // Endpoint de test pour vérifier qu'Application Insights fonctionne
+    try {
+      if (appInsights && appInsights.defaultClient) {
+        appInsights.defaultClient.trackEvent({ 
+          name: 'AITestEvent',
+          properties: { 
+            timestamp: new Date().toISOString(),
+            testMessage: 'Test de connectivité Application Insights'
+          }
+        });
+        appInsights.defaultClient.flush();
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          status: 'success',
+          message: 'Événement AI envoyé avec succès',
+          aiAvailable: true,
+          timestamp: new Date().toISOString()
+        }));
+      } else {
+        res.writeHead(503, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ 
+          status: 'error',
+          message: 'Application Insights non disponible',
+          aiAvailable: false
+        }));
+      }
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ 
+        status: 'error',
+        message: err.message,
+        aiAvailable: false
+      }));
+    }
   } else {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Page non trouvée (404)');
