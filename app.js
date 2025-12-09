@@ -39,6 +39,8 @@ const PORT = process.env.PORT || 8080;
 
 // Serveur HTTP
 const server = http.createServer((req, res) => {
+  const startTime = Date.now();
+
   if (req.url === '/') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     res.end(`
@@ -353,6 +355,19 @@ const server = http.createServer((req, res) => {
   } else {
     res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
     res.end('Page non trouvée (404)');
+  }
+
+  // Trace chaque requête pour Application Insights
+  if (appInsights?.defaultClient) {
+    res.on('finish', () => {
+      appInsights.defaultClient.trackRequest({
+        name: `${req.method} ${req.url}`,
+        url: req.url,
+        duration: Date.now() - startTime,
+        resultCode: res.statusCode,
+        success: res.statusCode < 400
+      });
+    });
   }
 });
 
